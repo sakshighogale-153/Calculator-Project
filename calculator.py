@@ -1,61 +1,87 @@
-# Import tkinter
 import tkinter as tk
+from tkinter import messagebox
 
-# Create main window
+# --- 1. Window Setup ---
 root = tk.Tk()
-root.title("Simple Calculator")
+root.title("TuteDude Assignment 6")
 root.geometry("300x400")
 
-# Entry box (display screen)
-entry = tk.Entry(root, width=20, font=("Arial", 20), borderwidth=5, relief="ridge")
-entry.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
+# --- 2. Global Variables (Required by Mentor) ---
+first_number = 0.0
+operator = ""
+is_operator_clicked = False
 
+# --- 3. Create the Entry Widget FIRST ---
+# This fixes the "entry is not defined" error from your screenshot
+entry = tk.Entry(root, width=15, font=('Arial', 24), borderwidth=5, justify='right')
+entry.grid(row=0, column=0, columnspan=4, padx=10, pady=20)
 
-# Function to click numbers
-def click_button(number):
-    current = entry.get()
+# --- 4. Logic Functions ---
+def button_click(number):
+    global is_operator_clicked
+    if is_operator_clicked:
+        entry.delete(0, tk.END)
+        entry.insert(0, str(number))
+        is_operator_clicked = False
+    else:
+        entry.insert(tk.END, str(number))
+
+def button_clear():
+    global first_number, operator
     entry.delete(0, tk.END)
-    entry.insert(0, current + str(number))
+    first_number = 0.0
+    operator = ""
 
-
-# Function to clear screen
-def clear():
-    entry.delete(0, tk.END)
-
-
-# Function to calculate result
-def calculate():
+def set_operation(op):
+    global first_number, operator, is_operator_clicked
     try:
-        result = eval(entry.get())
-        entry.delete(0, tk.END)
-        entry.insert(0, result)
-    except:
-        entry.delete(0, tk.END)
-        entry.insert(0, "Error")
+        first_number = float(entry.get())
+        operator = op
+        is_operator_clicked = True
+    except ValueError:
+        messagebox.showerror("Error", "Enter a number first")
 
+def calculate_result():
+    global first_number, operator
+    try:
+        second_number = float(entry.get())
+        entry.delete(0, tk.END)
 
-# Create buttons
-buttons = [
-    ('7',1,0), ('8',1,1), ('9',1,2), ('/',1,3),
-    ('4',2,0), ('5',2,1), ('6',2,2), ('*',2,3),
-    ('1',3,0), ('2',3,1), ('3',3,2), ('-',3,3),
-    ('0',4,0), ('.',4,1), ('C',4,2), ('+',4,3),
+        if operator == "+":
+            entry.insert(0, first_number + second_number)
+        elif operator == "-":
+            entry.insert(0, first_number - second_number)
+        elif operator == "*":
+            entry.insert(0, first_number * second_number)
+        elif operator == "/":
+            if second_number == 0:
+                entry.insert(0, "Error")
+            else:
+                entry.insert(0, first_number / second_number)
+    except Exception:
+        messagebox.showerror("Error", "Invalid Input")
+
+# --- 5. Buttons ---
+btns = [
+    ('7', 1, 0), ('8', 1, 1), ('9', 1, 2), ('/', 1, 3),
+    ('4', 2, 0), ('5', 2, 1), ('6', 2, 2), ('*', 2, 3),
+    ('1', 3, 0), ('2', 3, 1), ('3', 3, 2), ('-', 3, 3),
+    ('C', 4, 0), ('0', 4, 1), ('=', 4, 2), ('+', 4, 3),
 ]
 
-# Place buttons on screen
-for (text, row, col) in buttons:
-    if text == "C":
-        button = tk.Button(root, text=text, padx=20, pady=20,
-                           command=clear)
+for (text, r, c) in btns:
+    if text.isdigit():
+        action = lambda x=text: button_click(x)
+    elif text == "C":
+        action = button_clear
+    elif text == "=":
+        action = calculate_result
     else:
-        button = tk.Button(root, text=text, padx=20, pady=20,
-                           command=lambda t=text: click_button(t))
+        action = lambda x=text: set_operation(x)
+    
+    tk.Button(root, text=text, width=5, height=2, font=('Arial', 14),
+              command=action).grid(row=r, column=c, padx=2, pady=2)
 
-    button.grid(row=row, column=col)
-
-# Equal button
-equal_button = tk.Button(root, text="=", padx=20, pady=20, command=calculate)
-equal_button.grid(row=5, column=0, columnspan=4, sticky="nsew")
-
-# Run the app
+# --- 6. The Loop (This MUST be the last line) ---
+print("The code is now running! Look for the window.")
 root.mainloop()
