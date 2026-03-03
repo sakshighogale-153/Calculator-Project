@@ -1,87 +1,73 @@
+
 import tkinter as tk
-from tkinter import messagebox
 
-# --- 1. Window Setup ---
+# 1. Setup Global Variables (Use simple names)
+first_num = 0.0
+math_operator = ""
+
+# 2. Setup the Window
 root = tk.Tk()
-root.title("TuteDude Assignment 6")
-root.geometry("300x400")
+root.title("My Simple Calculator")
 
-# --- 2. Global Variables (Required by Mentor) ---
-first_number = 0.0
-operator = ""
-is_operator_clicked = False
+# 3. Create the Screen (Define this BEFORE the functions)
+screen = tk.Entry(root, width=20, font=("Arial", 16), borderwidth=5)
+screen.grid(row=0, column=0, columnspan=4)
 
-# --- 3. Create the Entry Widget FIRST ---
-# This fixes the "entry is not defined" error from your screenshot
-entry = tk.Entry(root, width=15, font=('Arial', 24), borderwidth=5, justify='right')
-entry.grid(row=0, column=0, columnspan=4, padx=10, pady=20)
+# 4. Functions for Logic
+def click_button(number):
+    current = screen.get()
+    screen.delete(0, tk.END)
+    screen.insert(0, str(current) + str(number))
 
-# --- 4. Logic Functions ---
-def button_click(number):
-    global is_operator_clicked
-    if is_operator_clicked:
-        entry.delete(0, tk.END)
-        entry.insert(0, str(number))
-        is_operator_clicked = False
-    else:
-        entry.insert(tk.END, str(number))
+def clear_button():
+    screen.delete(0, tk.END)
 
-def button_clear():
-    global first_number, operator
-    entry.delete(0, tk.END)
-    first_number = 0.0
-    operator = ""
+def set_math(op):
+    global first_num
+    global math_operator
+    first_num = float(screen.get())
+    math_operator = op
+    screen.delete(0, tk.END)
 
-def set_operation(op):
-    global first_number, operator, is_operator_clicked
-    try:
-        first_number = float(entry.get())
-        operator = op
-        is_operator_clicked = True
-    except ValueError:
-        messagebox.showerror("Error", "Enter a number first")
-
-def calculate_result():
-    global first_number, operator
-    try:
-        second_number = float(entry.get())
-        entry.delete(0, tk.END)
-
-        if operator == "+":
-            entry.insert(0, first_number + second_number)
-        elif operator == "-":
-            entry.insert(0, first_number - second_number)
-        elif operator == "*":
-            entry.insert(0, first_number * second_number)
-        elif operator == "/":
-            if second_number == 0:
-                entry.insert(0, "Error")
-            else:
-                entry.insert(0, first_number / second_number)
-    except Exception:
-        messagebox.showerror("Error", "Invalid Input")
-
-# --- 5. Buttons ---
-btns = [
-    ('7', 1, 0), ('8', 1, 1), ('9', 1, 2), ('/', 1, 3),
-    ('4', 2, 0), ('5', 2, 1), ('6', 2, 2), ('*', 2, 3),
-    ('1', 3, 0), ('2', 3, 1), ('3', 3, 2), ('-', 3, 3),
-    ('C', 4, 0), ('0', 4, 1), ('=', 4, 2), ('+', 4, 3),
-]
-
-for (text, r, c) in btns:
-    if text.isdigit():
-        action = lambda x=text: button_click(x)
-    elif text == "C":
-        action = button_clear
-    elif text == "=":
-        action = calculate_result
-    else:
-        action = lambda x=text: set_operation(x)
+def get_total():
+    global first_num
+    global math_operator
+    second_num = float(screen.get())
+    screen.delete(0, tk.END)
     
-    tk.Button(root, text=text, width=5, height=2, font=('Arial', 14),
-              command=action).grid(row=r, column=c, padx=2, pady=2)
+    # Manual Logic (No eval used)
+    if math_operator == "+":
+        screen.insert(0, first_num + second_num)
+    if math_operator == "-":
+        screen.insert(0, first_num - second_num)
+    if math_operator == "*":
+        screen.insert(0, first_num * second_num)
+    if math_operator == "/":
+        if second_num != 0:
+            screen.insert(0, first_num / second_num)
+        else:
+            screen.insert(0, "Error")
 
-# --- 6. The Loop (This MUST be the last line) ---
-print("The code is now running! Look for the window.")
+# 5. Buttons (Simplified for beginner look)
+tk.Button(root, text="1", padx=20, pady=20, command=lambda: click_button(1)).grid(row=1, column=0)
+tk.Button(root, text="2", padx=20, pady=20, command=lambda: click_button(2)).grid(row=1, column=1)
+tk.Button(root, text="3", padx=20, pady=20, command=lambda: click_button(3)).grid(row=1, column=2)
+tk.Button(root, text="+", padx=20, pady=20, command=lambda: set_math("+")).grid(row=1, column=3)
+
+tk.Button(root, text="4", padx=20, pady=20, command=lambda: click_button(4)).grid(row=2, column=0)
+tk.Button(root, text="5", padx=20, pady=20, command=lambda: click_button(5)).grid(row=2, column=1)
+tk.Button(root, text="6", padx=20, pady=20, command=lambda: click_button(6)).grid(row=2, column=2)
+tk.Button(root, text="-", padx=20, pady=20, command=lambda: set_math("-")).grid(row=2, column=3)
+
+tk.Button(root, text="7", padx=20, pady=20, command=lambda: click_button(7)).grid(row=3, column=0)
+tk.Button(root, text="8", padx=20, pady=20, command=lambda: click_button(8)).grid(row=3, column=1)
+tk.Button(root, text="9", padx=20, pady=20, command=lambda: click_button(9)).grid(row=3, column=2)
+tk.Button(root, text="*", padx=20, pady=20, command=lambda: set_math("*")).grid(row=3, column=3)
+
+tk.Button(root, text="C", padx=20, pady=20, command=clear_button).grid(row=4, column=0)
+tk.Button(root, text="0", padx=20, pady=20, command=lambda: click_button(0)).grid(row=4, column=1)
+tk.Button(root, text="=", padx=20, pady=20, command=get_total).grid(row=4, column=2)
+tk.Button(root, text="/", padx=20, pady=20, command=lambda: set_math("/")).grid(row=4, column=3)
+
 root.mainloop()
+
